@@ -60,6 +60,12 @@ void xturnDegrees(int degrees) {
 	move(0, 0);
 }
 
+// initialization
+void init() {
+	moveMotorA(100, 600);
+	resetGyro(S2);
+}
+
 //search
 void search() {
 	int dist = 255;
@@ -90,14 +96,24 @@ void search() {
 	}
 }
 
+// return to base
+void returnToBase() {
+	xturnDegrees(180);
+	claw(false);
+	moveTime(-40, -40, 1000);
+	xturnDegrees(-180);
+}
+
+// sort item
+void sortItem() {
+	//TBD
+}
+
 task main() {
-	moveMotorA(100, 600);
-	resetGyro(S2);
+	init();
 	while(true) {
 		search();
-		xturnDegrees(180);
-		claw(false);
-		moveTime(-40, -40, 1000);
-		xturnDegrees(-180);
+		returnToBase();
+		sortItem();
 	}
 }
