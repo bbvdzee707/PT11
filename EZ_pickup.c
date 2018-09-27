@@ -37,7 +37,7 @@ void claw(bool pickUp) {
 		setMotorSpeed(motorA, -40);
 		delay(1000);
 		setMotorSpeed(motorA, 0);
-		} else {
+	} else {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
 		setMotorSpeed(motorA, 0);
@@ -67,13 +67,14 @@ void init() {
 }
 
 //search
-void search() {
+bool search() {
 	int dist = 255;
 	int color_reflect = 0;
 	bool busy = true;
 	resetGyro(S2);
 	int heading = getGyroDegrees(S2);
 	int dHeading = 0;
+	bool done = false;
 
 	while (busy) {
 		dist = getUSDistance(S4);
@@ -94,6 +95,12 @@ void search() {
 			setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
 		}
 	}
+
+	if (done) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 // return to base
@@ -111,8 +118,10 @@ void sortItem() {
 
 task main() {
 	init();
-	while(true) {
-		search();
+
+	bool searching = true;
+	while(searching) {
+		searching = search();
 		returnToBase();
 		sortItem();
 	}
