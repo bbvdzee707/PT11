@@ -10,6 +10,7 @@
 #define DEFAULT_SPEED 20
 #define CORRECTION_RATE 1.1
 #define GYRO_CORRECTION 1.0
+#include "EV3Mailbox.c"
 
 //move with speed
 void move(int speedB, int speedC) {
@@ -32,7 +33,7 @@ void moveMotorA(int speed, int ms) {
 }
 
 //pick up or set down
-void claw(bool pickUp) {
+void clawControl(bool pickUp) {
 	if (pickUp == 1) {
 		setMotorSpeed(motorA, -40);
 		delay(1000);
@@ -89,7 +90,7 @@ bool search() {
 			move(0, 0);
 			setMotorSyncEncoder(motorB, motorC, -1*dHeading*CORRECTION_RATE, ENCODER_10CM, -1*DEFAULT_SPEED);
 			delay(750);
-			claw(true);
+			clawControl(true);
 			busy = false;
 		} else {
 			setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
@@ -106,7 +107,7 @@ bool search() {
 // return to base
 void returnToBase() {
 	xturnDegrees(180);
-	claw(false);
+	clawControl(false);
 	moveTime(-40, -40, 1000);
 	xturnDegrees(-180);
 }
@@ -114,6 +115,10 @@ void returnToBase() {
 // sort item
 void sortItem() {
 	//TBD
+}
+
+task TListen() {
+
 }
 
 task main() {
