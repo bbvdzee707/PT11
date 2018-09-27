@@ -108,7 +108,7 @@ bool search() {
 void returnToBase() {
 	xturnDegrees(180);
 	clawControl(false);
-	moveTime(-40, -40, 1000);
+	moveTime(40, 40, 1000);
 	xturnDegrees(-180);
 }
 
