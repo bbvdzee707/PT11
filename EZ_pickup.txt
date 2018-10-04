@@ -85,8 +85,8 @@ task TListen() {
 
 		}
 
-		int dist = getUSDistance(SULTRA);
-		int head = getGyroDegrees(SGYRO);
+		int dist = getUSDistance(S4);
+		int head = getGyroDegrees(S2);
 
 		sprintf(msgBufOut, "%i %i", dist, head);
 		writeMailboxOut("EV3_OUTBOX0", msgBufOut);
@@ -98,7 +98,7 @@ task TListen() {
 // initialization
 void init() {
 	moveMotorA(100, 600);
-	resetGyro(SGYRO);
+	resetGyro(S2);
 	//startTask(TListen);
 }
 
@@ -107,20 +107,20 @@ bool search() {
 	int dist = 255;
 	int color_reflect = 0;
 	bool busy = true;
-	resetGyro(SGYRO);
-	int heading = getGyroDegrees(SGYRO);
+	resetGyro(S2);
+	int heading = getGyroDegrees(S2);
 	int dHeading = 0;
 	bool done = false;
 
 	while (busy) {
-		dist = getUSDistance(SULTRA);
-		color_reflect = getColorReflected(SCOLOR);
-		dHeading = getGyroDegrees(SGYRO) - heading;
+		dist = getUSDistance(S4);
+		color_reflect = getColorReflected(S3);
+		dHeading = getGyroDegrees(S2) - heading;
 		setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
 
 		if (dist < 10) {
 			moveTime(-5, -20, 3500);
-			resetGyro(SGYRO);
+			resetGyro(S2);
 		} else if (color_reflect > 10) {
 			move(0, 0);
 			setMotorSyncEncoder(motorB, motorC, -1*dHeading*CORRECTION_RATE, ENCODER_10CM, -1*DEFAULT_SPEED);
@@ -142,36 +142,34 @@ bool search() {
 // return to base
 void returnToBase() {
 	xturnDegrees(90);
-
-	while (getColorReflected(SLINE) > 50) {
+	
+	while (getColorReflected(S1) > 50) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
-
+	
 	xturnDegrees(90);
+	
+	sensorReset(S1);
 
-	sensorReset(SLINE);
-
-	while(true) {
-		if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
+	while(true)
+	{
+		if(getColorReflected(S1) < COLOR_THRESHOLD)
+		{
 			motor(motorC) = BEND_SPEED;
 			motor(motorB) = DEFAULT_SPEED;
 
-		} else {
+		}
+		else
+		{
 			motor(motorC) = DEFAULT_SPEED;
 			motor(motorB) = BEND_SPEED;
-		}
-
-		if(getUSDistance(SULTRA) < 15) {
-			xturnDegrees(90);
-			break;
 		}
 	}
 }
 
 // sort item
 void sortItem() {
-	displayBigTextLine(1, "SORTING");
-	waitUntil(getButtonPress(buttonAny));
+	//TBD
 }
 
 task main() {
