@@ -1,3 +1,4 @@
+#pragma config(Sensor, S1,     Linefinder,     sensorEV3_Color)
 #pragma config(Sensor, S2,     Gyro,           sensorEV3_Gyro)
 #pragma config(Sensor, S3,     Color,          sensorEV3_Color)
 #pragma config(Sensor, S4,     Ultra,          sensorEV3_Ultrasonic)
@@ -61,10 +62,37 @@ void xturnDegrees(int degrees) {
 	move(0, 0);
 }
 
+// listen to commands from computer
+task TListen() {
+	char msgBufIn[MAX_MSG_LENGTH];  // To contain the incoming message.
+	char msgBufOut[MAX_MSG_LENGTH];  // To contain the outgoing message
+	openMailboxIn("EV3_INBOX0");
+	openMailboxOut("EV3_OUTBOX0");
+	while (true){
+		readMailboxIn("EV3_INBOX0", msgBufIn);
+		if (strcmp(msgBufIn, "")) {
+
+		} else if (strcmp(msgBufIn, "")) {
+
+		} else {
+
+		}
+
+		int dist = getUSDistance(S4);
+		int head = getGyroDegrees(S2);
+
+		sprintf(msgBufOut, "%i %i", dist, head);
+		writeMailboxOut("EV3_OUTBOX0", msgBufOut);
+
+		delay(100);
+	}
+}
+
 // initialization
 void init() {
 	moveMotorA(100, 600);
 	resetGyro(S2);
+	startTask(TListen);
 }
 
 //search
@@ -115,10 +143,6 @@ void returnToBase() {
 // sort item
 void sortItem() {
 	//TBD
-}
-
-task TListen() {
-
 }
 
 task main() {
