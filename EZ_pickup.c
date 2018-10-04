@@ -67,7 +67,7 @@ void xturnDegrees(int degrees) {
 	move(0, 0);
 }
 
-bool followLine() {
+bool followLineRight() {
 	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
 			motor(motorC) = BEND_SPEED;
 			motor(motorB) = DEFAULT_SPEED;
@@ -75,6 +75,18 @@ bool followLine() {
 		} else {
 			motor(motorC) = DEFAULT_SPEED;
 			motor(motorB) = BEND_SPEED;
+		}
+	return true;
+}
+
+bool followLineLeft() {
+	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
+			motor(motorB) = BEND_SPEED;
+			motor(motorC) = DEFAULT_SPEED;
+
+		} else {
+			motor(motorB) = DEFAULT_SPEED;
+			motor(motorC) = BEND_SPEED;
 		}
 	return true;
 }
@@ -164,9 +176,9 @@ void returnToBase() {
 
 	sensorReset(SLINE);
 
-	while(followLine()) {
+	while(followLineRight()) {
 		if(getUSDistance(SULTRA) < 15) {
-			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 200);
+			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 400);
 			xturnDegrees(90);
 			break;
 		} else {}
@@ -177,8 +189,8 @@ void returnToBase() {
 void sortItem() {
 	displayBigTextLine(1, "SORTING");
 
-	while (followLine()) {
-		if (getColorName(SCOLOR) == getColorName(SLINE)) {
+	while (followLineLeft()) {
+		if (getColorHue(SCOLOR) == getColorHue(SLINE)) {
 			move(0, 0);
 			break;
 		} else {}
