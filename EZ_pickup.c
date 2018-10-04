@@ -49,7 +49,10 @@ void clawControl(bool pickUp) {
 	} else {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
+		setMotorSpeed(motorA, -5);
+		delay(300);
 		setMotorSpeed(motorA, 0);
+
 	}
 }
 
