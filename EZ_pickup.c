@@ -49,8 +49,10 @@ void clawControl(bool pickUp) {
 	} else {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
-		setMotorSpeed(motorA, -5);
-		delay(300);
+		setMotorSpeed(motorA, 0);
+		delay(500);
+		setMotorSpeed(motorA, -40);
+		delay(800);
 		setMotorSpeed(motorA, 0);
 
 	}
@@ -70,6 +72,25 @@ void xturnDegrees(int degrees) {
 	}
 
 	move(0, 0);
+}
+
+bool followLine() {
+	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
+			motor(motorC) = BEND_SPEED;
+			motor(motorB) = DEFAULT_SPEED;
+
+		} else {
+			motor(motorC) = DEFAULT_SPEED;
+			motor(motorB) = BEND_SPEED;
+		}
+
+		if(getUSDistance(SULTRA) < 15) {
+			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 200);
+			xturnDegrees(90);
+			return false;
+		} else {
+			return true;
+		}
 }
 
 // listen to commands from computer
@@ -100,7 +121,7 @@ task TListen() {
 
 // initialization
 void init() {
-	moveMotorA(100, 600);
+	clawControl(false);
 	resetGyro(SGYRO);
 	//startTask(TListen);
 }
@@ -150,24 +171,15 @@ void returnToBase() {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
 
-	xturnDegrees(90);
+	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 300);
+
+	xturnDegrees(45);
+	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 200);
 
 	sensorReset(SLINE);
 
-	while(true) {
-		if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
-			motor(motorC) = BEND_SPEED;
-			motor(motorB) = DEFAULT_SPEED;
+	while(followLine()) {
 
-		} else {
-			motor(motorC) = DEFAULT_SPEED;
-			motor(motorB) = BEND_SPEED;
-		}
-
-		if(getUSDistance(SULTRA) < 15) {
-			xturnDegrees(90);
-			break;
-		}
 	}
 }
 
