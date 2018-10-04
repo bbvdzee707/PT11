@@ -11,6 +11,8 @@
 #define DEFAULT_SPEED 20
 #define CORRECTION_RATE 1.1
 #define GYRO_CORRECTION 1.0
+#define BEND_SPEED 15
+#define COLOR_THRESHOLD 42
 #include "EV3Mailbox.c"
 
 //move with speed
@@ -92,7 +94,7 @@ task TListen() {
 void init() {
 	moveMotorA(100, 600);
 	resetGyro(S2);
-	startTask(TListen);
+	//startTask(TListen);
 }
 
 //search
@@ -134,10 +136,21 @@ bool search() {
 
 // return to base
 void returnToBase() {
-	xturnDegrees(180);
-	clawControl(false);
-	moveTime(40, 40, 1000);
-	xturnDegrees(-180);
+	xturnDegrees(90);
+	sensorReset(S1);
+	while (getColorReflected(S1) > COLOR_THRESHOLD) {
+		move(DEFAULT_SPEED, DEFAULT_SPEED);
+	}
+	xturnDegrees(90);
+	int brake = 0;
+
+	while (true) {
+		if (getColorReflected(S1) < COLOR_THRESHOLD) { // te zwart, naar rechts
+			setMotorSyncEncoder(motorB, motorC, -10, ENCODER_10CM/10, -1*DEFAULT_SPEED + brake);
+		} else if (getColorReflected(S1) >= COLOR_THRESHOLD) { // te wit, naar links
+			setMotorSyncEncoder(motorB, motorC, 10, ENCODER_10CM/10, -1*DEFAULT_SPEED + brake);
+		} else {}
+	}
 }
 
 // sort item
