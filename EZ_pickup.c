@@ -79,7 +79,7 @@ bool followLineRight() {
 	return true;
 }
 
-bool followLineLeft() {
+bool followSortLine() {
 	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
 			motor(motorB) = BEND_SPEED;
 			motor(motorC) = DEFAULT_SPEED;
@@ -87,6 +87,13 @@ bool followLineLeft() {
 		} else {
 			motor(motorB) = DEFAULT_SPEED;
 			motor(motorC) = BEND_SPEED;
+		}
+
+		if (getColorHue(SCOLOR) == getColorHue(SLINE)) {
+			move(0, 0);
+			return false;
+		} else {
+			return true;
 		}
 	return true;
 }
@@ -189,11 +196,8 @@ void returnToBase() {
 void sortItem() {
 	displayBigTextLine(1, "SORTING");
 
-	while (followLineLeft()) {
-		if (getColorHue(SCOLOR) == getColorHue(SLINE)) {
-			move(0, 0);
-			break;
-		} else {}
+	while (followSortLine()) {
+
 	}
 
 	displayBigTextLine(1, "COLOR MATCH FOUND");
