@@ -33,13 +33,6 @@ void moveTime(int speedB, int speedC, int time) {
 	move(0, 0);
 }
 
-//move the claw
-void moveMotorA(int speed, int ms) {
-	setMotorSpeed(motorA, speed);
-	delay(ms);
-	setMotorSpeed(motorA, 0);
-}
-
 //pick up or set down
 void clawControl(bool pickUp) {
 	if (pickUp == 1) {
@@ -83,14 +76,7 @@ bool followLine() {
 			motor(motorC) = DEFAULT_SPEED;
 			motor(motorB) = BEND_SPEED;
 		}
-
-		if(getUSDistance(SULTRA) < 15) {
-			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 200);
-			xturnDegrees(90);
-			return false;
-		} else {
-			return true;
-		}
+	return true;
 }
 
 // listen to commands from computer
@@ -174,19 +160,32 @@ void returnToBase() {
 	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 300);
 
 	xturnDegrees(45);
-	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 200);
+	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 400);
 
 	sensorReset(SLINE);
 
 	while(followLine()) {
-
+		if(getUSDistance(SULTRA) < 15) {
+			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 200);
+			xturnDegrees(90);
+			break;
+		} else {}
 	}
 }
 
 // sort item
 void sortItem() {
 	displayBigTextLine(1, "SORTING");
-	waitUntil(getButtonPress(buttonAny));
+
+	while (followLine()) {
+		if (getColorName(SCOLOR) == getColorName(SLINE)) {
+			move(0, 0);
+			break;
+		} else {}
+	}
+
+	displayBigTextLine(1, "COLOR MATCH FOUND");
+	waitUntil(getButtonPress(buttonEnter));
 }
 
 task main() {
