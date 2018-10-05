@@ -79,6 +79,16 @@ bool followLineRight() {
 	return true;
 }
 
+string getColorFromHue(int hue) {
+	if(hue > 0 && hue < ){return "red";}
+	else if(){return "yellow";}
+	else if(){return "green";}
+	else if(){return "cyan";}
+	else if(){return "blue";}
+	else if(){return "purple";}
+	else if(){return "red";}
+}
+
 bool followSortLine() {
 	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
 			motor(motorB) = BEND_SPEED;
