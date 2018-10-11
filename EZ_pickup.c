@@ -40,7 +40,7 @@ void clawControl(bool pickUp) {
 		setMotorSpeed(motorA, -40);
 		delay(1000);
 		setMotorSpeed(motorA, 0);
-	} else {
+		} else {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
 		setMotorSpeed(motorA, 0);
@@ -70,13 +70,13 @@ void xturnDegrees(int degrees) {
 
 bool followLineRight() {
 	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
-			motor(motorC) = BEND_SPEED;
-			motor(motorB) = DEFAULT_SPEED;
+		motor(motorC) = BEND_SPEED;
+		motor(motorB) = DEFAULT_SPEED;
 
 		} else {
-			motor(motorC) = DEFAULT_SPEED;
-			motor(motorB) = BEND_SPEED;
-		}
+		motor(motorC) = DEFAULT_SPEED;
+		motor(motorB) = BEND_SPEED;
+	}
 	return true;
 }
 
@@ -93,68 +93,68 @@ bool followLineRight() {
 
 bool followSortLine() {
 	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
-			motor(motorB) = BEND_SPEED;
-			motor(motorC) = DEFAULT_SPEED;
+		motor(motorB) = BEND_SPEED;
+		motor(motorC) = DEFAULT_SPEED;
 
 		} else {
-			motor(motorB) = DEFAULT_SPEED;
-			motor(motorC) = BEND_SPEED;
-		}
+		motor(motorB) = DEFAULT_SPEED;
+		motor(motorC) = BEND_SPEED;
+	}
 
-		if (getColorHue(SCOLOR) == getColorHue(SLINE)) {
-			move(0, 0);
-			return false;
+	if (getColorHue(SCOLOR) == getColorHue(SLINE)) {
+		move(0, 0);
+		return false;
 		} else {
-			return true;
-		}
+		return true;
+	}
 	return true;
 }
 
 // listen to commands from computer
-task TListen() {
+bool TListen() {
 	char msgBufIn[MAX_MSG_LENGTH];  // To contain the incoming message.
 	char msgBufOut[MAX_MSG_LENGTH];  // To contain the outgoing message
 	openMailboxIn("EV3_INBOX0");
 	openMailboxOut("EV3_OUTBOX0");
 
 	int newSpeed = DEFAULT_SPEED;
+	bool go = true;
 
-	while (true){
-		readMailboxIn("EV3_INBOX0", msgBufIn);
-		if (strcmp(msgBufIn, "speed 0")) {
-			newSpeed = 0 * 6;
+	readMailboxIn("EV3_INBOX0", msgBufIn);
+	if (strcmp(msgBufIn, "speed 0")) {
+		newSpeed = 0 * 6;
 		} else if (strcmp(msgBufIn, "speed 1")) {
-			newSpeed = 1 * 6;
+		newSpeed = 1 * 6;
 		} else if (strcmp(msgBufIn, "speed 2")) {
-			newSpeed = 2 * 6;
+		newSpeed = 2 * 6;
 		} else if (strcmp(msgBufIn, "speed 3")) {
-			newSpeed = 3 * 6;
+		newSpeed = 3 * 6;
 		} else if (strcmp(msgBufIn, "speed 4")) {
-			newSpeed = 4 * 6;
+		newSpeed = 4 * 6;
 		} else if (strcmp(msgBufIn, "speed 5")) {
-			newSpeed = 5 * 6;
+		newSpeed = 5 * 6;
 		} else {
 
-		}
-
-		DEFAULT_SPEED = newSpeed;
-		BEND_SPEED = (int)(newSpeed/2);
-
-		int dist = getUSDistance(SULTRA);
-		int head = getGyroDegrees(SGYRO);
-
-		sprintf(msgBufOut, "%i %i", dist, head);
-		writeMailboxOut("EV3_OUTBOX0", msgBufOut);
-
-		delay(100);
 	}
+
+	DEFAULT_SPEED = newSpeed;
+	BEND_SPEED = (int)(newSpeed/2);
+
+	int dist = getUSDistance(SULTRA);
+	int head = getGyroDegrees(SGYRO);
+
+	sprintf(msgBufOut, "%i %i", dist, head);
+	writeMailboxOut("EV3_OUTBOX0", msgBufOut);
+
+	delay(100);
+	return go;
 }
 
 // initialization
 void init() {
 	clawControl(false);
 	resetGyro(SGYRO);
-	startTask(TListen);
+	TListen();
 }
 
 //search
@@ -168,6 +168,7 @@ bool search() {
 	bool done = false;
 
 	while (busy) {
+		busy = TListen();
 		dist = getUSDistance(SULTRA);
 		color_reflect = getColorReflected(SCOLOR);
 		dHeading = getGyroDegrees(SGYRO) - heading;
@@ -176,20 +177,20 @@ bool search() {
 		if (dist < 10) {
 			moveTime(-5, -20, 3500);
 			resetGyro(SGYRO);
-		} else if (color_reflect > 10) {
+			} else if (color_reflect > 10) {
 			move(0, 0);
 			setMotorSyncEncoder(motorB, motorC, -1*dHeading*CORRECTION_RATE, ENCODER_10CM, -1*DEFAULT_SPEED);
 			delay(750);
 			clawControl(true);
 			busy = false;
-		} else {
+			} else {
 			setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
 		}
 	}
 
 	if (done) {
 		return false;
-	} else {
+		} else {
 		return true;
 	}
 }
@@ -210,6 +211,7 @@ void returnToBase() {
 	sensorReset(SLINE);
 
 	while(followLineRight()) {
+		TListen();
 		if(getUSDistance(SULTRA) < 15) {
 			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 400);
 			xturnDegrees(90);
@@ -223,7 +225,7 @@ void sortItem() {
 	displayBigTextLine(1, "SORTING");
 
 	while (followSortLine()) {
-
+		TListen();
 	}
 
 	displayBigTextLine(1, "COLOR MATCH FOUND");
@@ -232,11 +234,12 @@ void sortItem() {
 
 task main() {
 	init();
-
-	bool searching = true;
-	while(searching) {
-		searching = search();
-		returnToBase();
-		sortItem();
+	while (TListen()) {
+		bool searching = true;
+		while(searching) {
+			searching = search();
+			returnToBase();
+			sortItem();
+		}
 	}
 }
