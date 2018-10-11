@@ -123,22 +123,25 @@ bool TListen() {
 	openMailboxIn("EV3_INBOX0");
 	openMailboxOut("EV3_OUTBOX0");
 
+	displayBigTextLine(1, msgBufIn);
+	delay(1000);
+
 	int newSpeed = DEFAULT_SPEED;
 	go = DEFAULT_GO;
 
 	readMailboxIn("EV3_INBOX0", msgBufIn);
 	//if (strcmp(msgBufIn, "speed 0")) {
-	//	newSpeed = 0 * 6;
-	//} else if (strcmp(msgBufIn, "speed 1")) {
 	//	newSpeed = 1 * 6;
-	//} else if (strcmp(msgBufIn, "speed 2")) {
+	//} else if (strcmp(msgBufIn, "speed 1")) {
 	//	newSpeed = 2 * 6;
-	//} else if (strcmp(msgBufIn, "speed 3")) {
+	//} else if (strcmp(msgBufIn, "speed 2")) {
 	//	newSpeed = 3 * 6;
-	//} else if (strcmp(msgBufIn, "speed 4")) {
+	//} else if (strcmp(msgBufIn, "speed 3")) {
 	//	newSpeed = 4 * 6;
-	//} else if (strcmp(msgBufIn, "speed 5")) {
+	//} else if (strcmp(msgBufIn, "speed 4")) {
 	//	newSpeed = 5 * 6;
+	//} else if (strcmp(msgBufIn, "speed 5")) {
+	//	newSpeed = 6 * 6;
 	//} else if (strcmp(msgBufIn, "Start")) {
 	//	go = true;
 	//} else if (strcmp(msgBufIn, "Stop")) {
@@ -231,7 +234,9 @@ bool search() {
 			xturnDegrees(turn * 90);
 			evenLane = !evenLane;
 			resetGyro(SGYRO);
-		} else if (color_reflect > 10) {
+		}
+
+		if (color_reflect > 10) {
 			move(0, 0);
 			setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, -1*DEFAULT_SPEED);
 			delay(750);
