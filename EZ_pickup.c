@@ -17,6 +17,7 @@ int DEFAULT_SPEED = 25;
 int BEND_SPEED = (int)(DEFAULT_SPEED/2);
 bool go = true;
 bool DEFAULT_GO = true;
+bool evenLane = true;
 
 #define SLINE S1
 #define SGYRO S2
@@ -67,10 +68,20 @@ bool followLineRight() {
 	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
 		motor(motorC) = BEND_SPEED;
 		motor(motorB) = DEFAULT_SPEED;
-
 		} else {
 		motor(motorC) = DEFAULT_SPEED;
 		motor(motorB) = BEND_SPEED;
+	}
+	return true;
+}
+
+bool followLineLeft() {
+	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
+		motor(motorB) = BEND_SPEED;
+		motor(motorC) = DEFAULT_SPEED;
+		} else {
+		motor(motorB) = DEFAULT_SPEED;
+		motor(motorC) = BEND_SPEED;
 	}
 	return true;
 }
@@ -173,6 +184,7 @@ bool search() {
 	resetGyro(SGYRO);
 	int heading = getGyroDegrees(SGYRO);
 	int dHeading = 0;
+	clearTimer(T1);
 	bool done = false;
 
 	while (busy) {
@@ -182,17 +194,33 @@ bool search() {
 		dHeading = getGyroDegrees(SGYRO) - heading;
 		setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
 
+		if (getTimerValue(T1) > 2000) {
+			move(0, 0);
+			delay(500);
+			resetGyro(SGYRO);
+			clearTimer(T1);
+		}
+
+		string out = "";
+		stringFormat(out, "%1.1f", getGyroDegrees(SGYRO));
+
+		displayBigTextLine(1, "SEARCHING");
+		displayBigTextLine(4, out);
+
 		if (dist < 10) {
 			xturnDegrees(90);
-			delay(100);
+			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
+			waitUntilMotorStop(motorB);
+			xTurnDegrees(90);
+			evenLane = !evenLane;
 			resetGyro(SGYRO);
-			} else if (color_reflect > 10) {
+		} else if (color_reflect > 10) {
 			move(0, 0);
 			setMotorSyncEncoder(motorB, motorC, -1*dHeading*CORRECTION_RATE, ENCODER_10CM, -1*DEFAULT_SPEED);
 			delay(750);
 			clawControl(true);
 			busy = false;
-			} else {
+		} else {
 			setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
 		}
 	}
@@ -206,7 +234,14 @@ bool search() {
 
 // return to base
 void returnToBase() {
-	xturnDegrees(90);
+	int turn = 0;
+	if (evenLane) {
+		turn = 1;
+	} else {
+		turn = -1;
+	}
+
+	xturnDegrees(turn * 90);
 
 	while (getColorReflected(SLINE) > 50) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
@@ -214,14 +249,14 @@ void returnToBase() {
 
 	setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 	waitUntilMotorStop(motorB);
-	xturnDegrees(45);
+	xturnDegrees(turn * 45);
 	sensorReset(SLINE);
 
 	while(followLineRight()) {
 		TListen();
 		if(getUSDistance(SULTRA) < 15) {
 			setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
-			xturnDegrees(90);
+			xturnDegrees(turn * 90);
 			break;
 		} else {}
 	}
