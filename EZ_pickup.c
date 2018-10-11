@@ -175,6 +175,19 @@ void init() {
 	eraseDisplay();
 }
 
+void correct(int goal) {
+	if (getGyroDegrees(SGYRO) < goal) {
+		while (getGyroDegrees(SGYRO) < goal) {
+			setMotorSpeed(motorB, 5);
+		}
+	} else {
+		while (getGyroDegrees(SGYRO) > goal) {
+			setMotorSpeed(motorB, -5);
+		}
+	}
+	move(0, 0);
+}
+
 //search
 bool search() {
 	int dist = 255;
@@ -183,7 +196,6 @@ bool search() {
 	delay(100);
 	resetGyro(SGYRO);
 	int heading = getGyroDegrees(SGYRO);
-	int dHeading = 0;
 	clearTimer(T1);
 	bool done = false;
 
@@ -191,11 +203,11 @@ bool search() {
 		busy = TListen();
 		dist = getUSDistance(SULTRA);
 		color_reflect = getColorReflected(SCOLOR);
-		dHeading = getGyroDegrees(SGYRO) - heading;
-		setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
+		setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
 
 		if (getTimerValue(T1) > 2000) {
 			move(0, 0);
+			correct(heading);
 			delay(500);
 			resetGyro(SGYRO);
 			clearTimer(T1);
@@ -204,24 +216,29 @@ bool search() {
 		string out = "";
 		stringFormat(out, "%1.1f", getGyroDegrees(SGYRO));
 
+		eraseDisplay();
 		displayBigTextLine(1, "SEARCHING");
 		displayBigTextLine(4, out);
 
 		if (dist < 10) {
-			xturnDegrees(90);
+			int turn = 1;
+			if (!evenLane) {
+				turn = -1;
+			}
+			xturnDegrees(turn * 90);
 			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 			waitUntilMotorStop(motorB);
-			xTurnDegrees(90);
+			xturnDegrees(turn * 90);
 			evenLane = !evenLane;
 			resetGyro(SGYRO);
 		} else if (color_reflect > 10) {
 			move(0, 0);
-			setMotorSyncEncoder(motorB, motorC, -1*dHeading*CORRECTION_RATE, ENCODER_10CM, -1*DEFAULT_SPEED);
+			setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, -1*DEFAULT_SPEED);
 			delay(750);
 			clawControl(true);
 			busy = false;
 		} else {
-			setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
+			setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
 		}
 	}
 
@@ -236,9 +253,9 @@ bool search() {
 void returnToBase() {
 	int turn = 0;
 	if (evenLane) {
-		turn = 1;
-	} else {
 		turn = -1;
+	} else {
+		turn = 1;
 	}
 
 	xturnDegrees(turn * 90);
