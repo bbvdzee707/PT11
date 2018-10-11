@@ -123,17 +123,17 @@ bool TListen() {
 	readMailboxIn("EV3_INBOX0", msgBufIn);
 	if (strcmp(msgBufIn, "speed 0")) {
 		newSpeed = 0 * 6;
-		} else if (strcmp(msgBufIn, "speed 1")) {
+	} else if (strcmp(msgBufIn, "speed 1")) {
 		newSpeed = 1 * 6;
-		} else if (strcmp(msgBufIn, "speed 2")) {
+	} else if (strcmp(msgBufIn, "speed 2")) {
 		newSpeed = 2 * 6;
-		} else if (strcmp(msgBufIn, "speed 3")) {
+	} else if (strcmp(msgBufIn, "speed 3")) {
 		newSpeed = 3 * 6;
-		} else if (strcmp(msgBufIn, "speed 4")) {
+	} else if (strcmp(msgBufIn, "speed 4")) {
 		newSpeed = 4 * 6;
-		} else if (strcmp(msgBufIn, "speed 5")) {
+	} else if (strcmp(msgBufIn, "speed 5")) {
 		newSpeed = 5 * 6;
-		} else {
+	} else {
 
 	}
 
