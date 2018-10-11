@@ -264,14 +264,14 @@ void returnToBase() {
 
 	setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 	waitUntilMotorStop(motorB);
-	xturnDegrees(turn * 45);
+	xturnDegrees(45);
 	sensorReset(SLINE);
 
 	while(followLineRight()) {
 		TListen();
 		if(getUSDistance(SULTRA) < 15) {
 			setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
-			xturnDegrees(turn * 90);
+			xturnDegrees(90);
 			break;
 		} else {}
 	}
