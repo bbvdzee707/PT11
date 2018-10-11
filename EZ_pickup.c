@@ -13,9 +13,10 @@
 #define COLOR_THRESHOLD 50
 #include "EV3Mailbox.c"
 
-int DEFAULT_SPEED = 32;
+int DEFAULT_SPEED = 25;
 int BEND_SPEED = (int)(DEFAULT_SPEED/2);
-bool go = false;
+bool go = true;
+bool DEFAULT_GO = true;
 
 #define SLINE S1
 #define SGYRO S2
@@ -38,9 +39,7 @@ void clawControl(bool pickUp) {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
 		setMotorSpeed(motorA, 0);
-		delay(500);
-		setMotorSpeed(motorA, -40);
-		delay(800);
+		delay(1000);
 		setMotorSpeed(motorA, 0);
 
 	}
@@ -48,6 +47,8 @@ void clawControl(bool pickUp) {
 
 //turn x degrees
 void xturnDegrees(int degrees) {
+	move(0, 0);
+	delay(100);
 	resetGyro(SGYRO);
 	int correction = 100;
 
@@ -112,28 +113,28 @@ bool TListen() {
 	openMailboxOut("EV3_OUTBOX0");
 
 	int newSpeed = DEFAULT_SPEED;
-	go = false;
+	go = DEFAULT_GO;
 
 	readMailboxIn("EV3_INBOX0", msgBufIn);
-	if (strcmp(msgBufIn, "speed 0")) {
-		newSpeed = 0 * 6;
-	} else if (strcmp(msgBufIn, "speed 1")) {
-		newSpeed = 1 * 6;
-	} else if (strcmp(msgBufIn, "speed 2")) {
-		newSpeed = 2 * 6;
-	} else if (strcmp(msgBufIn, "speed 3")) {
-		newSpeed = 3 * 6;
-	} else if (strcmp(msgBufIn, "speed 4")) {
-		newSpeed = 4 * 6;
-	} else if (strcmp(msgBufIn, "speed 5")) {
-		newSpeed = 5 * 6;
-	} else if (strcmp(msgBufIn, "Start")) {
-		go = true;
-	} else if (strcmp(msgBufIn, "Stop")) {
-		go = false;
-	} else {
+	//if (strcmp(msgBufIn, "speed 0")) {
+	//	newSpeed = 0 * 6;
+	//} else if (strcmp(msgBufIn, "speed 1")) {
+	//	newSpeed = 1 * 6;
+	//} else if (strcmp(msgBufIn, "speed 2")) {
+	//	newSpeed = 2 * 6;
+	//} else if (strcmp(msgBufIn, "speed 3")) {
+	//	newSpeed = 3 * 6;
+	//} else if (strcmp(msgBufIn, "speed 4")) {
+	//	newSpeed = 4 * 6;
+	//} else if (strcmp(msgBufIn, "speed 5")) {
+	//	newSpeed = 5 * 6;
+	//} else if (strcmp(msgBufIn, "Start")) {
+	//	go = true;
+	//} else if (strcmp(msgBufIn, "Stop")) {
+	//	go = false;
+	//} else {
 
-	}
+	//}
 
 	DEFAULT_SPEED = newSpeed;
 	BEND_SPEED = (int)(newSpeed/2);
@@ -151,10 +152,16 @@ bool TListen() {
 // initialization
 void init() {
 	clawControl(false);
+	move(0, 0);
+	delay(100);
 	resetGyro(SGYRO);
+
+	displayBigTextLine(2, "WAITING FOR");
+	displayBigTextLine(5, "CONNECTION");
 	while(!TListen()) {
 		delay(100);
 	}
+	eraseDisplay();
 }
 
 //search
@@ -162,6 +169,7 @@ bool search() {
 	int dist = 255;
 	int color_reflect = 0;
 	bool busy = true;
+	delay(100);
 	resetGyro(SGYRO);
 	int heading = getGyroDegrees(SGYRO);
 	int dHeading = 0;
@@ -176,6 +184,7 @@ bool search() {
 
 		if (dist < 10) {
 			xturnDegrees(90);
+			delay(100);
 			resetGyro(SGYRO);
 			} else if (color_reflect > 10) {
 			move(0, 0);
@@ -204,10 +213,8 @@ void returnToBase() {
 	}
 
 	setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
-
+	waitUntilMotorStop(motorB);
 	xturnDegrees(45);
-	setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
-
 	sensorReset(SLINE);
 
 	while(followLineRight()) {
@@ -234,12 +241,10 @@ void sortItem() {
 
 task main() {
 	init();
-	while (TListen()) {
 		bool searching = true;
 		while(searching) {
 			searching = search();
 			returnToBase();
 			sortItem();
 		}
-	}
 }
