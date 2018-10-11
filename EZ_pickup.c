@@ -15,6 +15,7 @@
 
 int DEFAULT_SPEED = 32;
 int BEND_SPEED = (int)(DEFAULT_SPEED/2);
+bool go = false;
 
 #define SLINE S1
 #define SGYRO S2
@@ -25,13 +26,6 @@ int BEND_SPEED = (int)(DEFAULT_SPEED/2);
 void move(int speedB, int speedC) {
 	setMotorSpeed(motorB, speedB);
 	setMotorSpeed(motorC, speedC);
-}
-
-//move with speed for time
-void moveTime(int speedB, int speedC, int time) {
-	move(speedB, speedC);
-	delay(time);
-	move(0, 0);
 }
 
 //pick up or set down
@@ -118,7 +112,7 @@ bool TListen() {
 	openMailboxOut("EV3_OUTBOX0");
 
 	int newSpeed = DEFAULT_SPEED;
-	bool go = true;
+	go = false;
 
 	readMailboxIn("EV3_INBOX0", msgBufIn);
 	if (strcmp(msgBufIn, "speed 0")) {
@@ -133,6 +127,10 @@ bool TListen() {
 		newSpeed = 4 * 6;
 	} else if (strcmp(msgBufIn, "speed 5")) {
 		newSpeed = 5 * 6;
+	} else if (strcmp(msgBufIn, "Start")) {
+		go = true;
+	} else if (strcmp(msgBufIn, "Stop")) {
+		go = false;
 	} else {
 
 	}
@@ -154,7 +152,9 @@ bool TListen() {
 void init() {
 	clawControl(false);
 	resetGyro(SGYRO);
-	TListen();
+	while(!TListen()) {
+		delay(100);
+	}
 }
 
 //search
@@ -175,7 +175,7 @@ bool search() {
 		setMotorSync(motorB, motorC, -1*dHeading*CORRECTION_RATE, -1*DEFAULT_SPEED);
 
 		if (dist < 10) {
-			moveTime(-5, -20, 3500);
+			xturnDegrees(90);
 			resetGyro(SGYRO);
 			} else if (color_reflect > 10) {
 			move(0, 0);
@@ -203,17 +203,17 @@ void returnToBase() {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
 
-	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 300);
+	setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 
 	xturnDegrees(45);
-	moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 400);
+	setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
 
 	sensorReset(SLINE);
 
 	while(followLineRight()) {
 		TListen();
 		if(getUSDistance(SULTRA) < 15) {
-			moveTime(DEFAULT_SPEED, DEFAULT_SPEED, 400);
+			setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
 			xturnDegrees(90);
 			break;
 		} else {}
