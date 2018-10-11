@@ -251,11 +251,9 @@ bool search() {
 
 // return to base
 void returnToBase() {
-	int turn = 0;
-	if (evenLane) {
+	int turn = 1;
+	if (!evenLane) {
 		turn = -1;
-	} else {
-		turn = 1;
 	}
 
 	xturnDegrees(turn * 90);
