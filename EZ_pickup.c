@@ -12,6 +12,7 @@
 #define GYRO_CORRECTION 1.0
 #define COLOR_THRESHOLD 50
 #include "EV3Mailbox.c"
+#define DEFAULT_TURN_SPEED 20
 
 int DEFAULT_SPEED = 25;
 int BEND_SPEED = (int)(DEFAULT_SPEED/2);
@@ -62,6 +63,17 @@ void xturnDegrees(int degrees) {
 	}
 
 	move(0, 0);
+}
+
+// true=right, false=left
+void turn90(bool direction) {
+	move(0, 0);
+	if(!direction) {
+		setMotorSyncEncoder(motorB, motorC, -100, 1023, DEFAULT_TURN_SPEED);
+	} else {
+		setMotorSyncEncoder(motorB, motorC, 100, 1023, DEFAULT_TURN_SPEED);
+	}
+	waitUntilMotorStop(motorB);
 }
 
 bool followLineRight() {
@@ -224,14 +236,14 @@ bool search() {
 		displayBigTextLine(4, out);
 
 		if (dist < 10) {
-			int turn = 1;
+			bool turn = true;
 			if (!evenLane) {
-				turn = -1;
+				turn = false;
 			}
-			xturnDegrees(turn * 90);
+			turn90(turn);
 			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 			waitUntilMotorStop(motorB);
-			xturnDegrees(turn * 90);
+			turn90(turn);
 			evenLane = !evenLane;
 			resetGyro(SGYRO);
 		}
@@ -256,12 +268,12 @@ bool search() {
 
 // return to base
 void returnToBase() {
-	int turn = 1;
+	int turn = true;
 	if (!evenLane) {
-		turn = -1;
+		turn = false;
 	}
 
-	xturnDegrees(turn * 90);
+	turn90(turn);
 
 	while (getColorReflected(SLINE) > 50) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
@@ -276,7 +288,7 @@ void returnToBase() {
 		TListen();
 		if(getUSDistance(SULTRA) < 15) {
 			setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
-			xturnDegrees(90);
+			turn90(true);
 			break;
 		} else {}
 	}
