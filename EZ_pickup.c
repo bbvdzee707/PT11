@@ -233,6 +233,7 @@ bool search() {
 			if (!evenLane) {
 				turn = false;
 			}
+
 			turn90(turn);
 			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 			waitUntilMotorStop(motorB);
