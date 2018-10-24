@@ -47,31 +47,24 @@ void clawControl(bool pickUp) {
 	}
 }
 
-//turn x degrees
-void xturnDegrees(int degrees) {
-	move(0, 0);
-	delay(100);
-	resetGyro(SGYRO);
-	int correction = 100;
-
-	if (getGyroDegrees(SGYRO) <= degrees*GYRO_CORRECTION) {
-		correction *= -1;
-	}
-
-	while (abs(getGyroDegrees(SGYRO)) < abs(degrees*GYRO_CORRECTION)) {
-		setMotorSync(motorB, motorC, correction, 15);
-	}
-
-	move(0, 0);
-}
-
 // true=right, false=left
+int turnTicks = 200;
 void turn90(bool direction) {
 	move(0, 0);
 	if(!direction) {
-		setMotorSyncEncoder(motorB, motorC, -100, 1023, DEFAULT_TURN_SPEED);
+		setMotorSyncEncoder(motorB, motorC, 100, turnTicks, DEFAULT_TURN_SPEED);
 	} else {
-		setMotorSyncEncoder(motorB, motorC, 100, 1023, DEFAULT_TURN_SPEED);
+		setMotorSyncEncoder(motorB, motorC, -100, turnTicks, DEFAULT_TURN_SPEED);
+	}
+	waitUntilMotorStop(motorB);
+}
+
+void turn45(bool direction) {
+	move(0, 0);
+	if(!direction) {
+		setMotorSyncEncoder(motorB, motorC, 100, turnTicks/2, DEFAULT_TURN_SPEED);
+	} else {
+		setMotorSyncEncoder(motorB, motorC, -100, turnTicks/2, DEFAULT_TURN_SPEED);
 	}
 	waitUntilMotorStop(motorB);
 }
@@ -281,7 +274,7 @@ void returnToBase() {
 
 	setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 	waitUntilMotorStop(motorB);
-	xturnDegrees(45);
+	turn45(true);
 	sensorReset(SLINE);
 
 	while(followLineRight()) {
