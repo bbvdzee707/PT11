@@ -31,22 +31,6 @@ void move(int speedB, int speedC) {
 	setMotorSpeed(motorC, speedC);
 }
 
-//pick up or set down
-void clawControl(bool pickUp) {
-	if (pickUp == 1) {
-		setMotorSpeed(motorA, -40);
-		delay(1000);
-		setMotorSpeed(motorA, 0);
-		} else {
-		setMotorSpeed(motorA, 40);
-		delay(1000);
-		setMotorSpeed(motorA, 0);
-		delay(1000);
-		setMotorSpeed(motorA, 0);
-
-	}
-}
-
 // true=right, false=left
 int turnTicks = 200;
 void turn90(bool direction) {
@@ -55,6 +39,16 @@ void turn90(bool direction) {
 		setMotorSyncEncoder(motorB, motorC, 100, turnTicks, DEFAULT_TURN_SPEED);
 	} else {
 		setMotorSyncEncoder(motorB, motorC, -100, turnTicks, DEFAULT_TURN_SPEED);
+	}
+	waitUntilMotorStop(motorB);
+}
+
+void turn45(bool direction) {
+	move(0, 0);
+	if(!direction) {
+		setMotorSyncEncoder(motorB, motorC, 100, (turnTicks/4)*3, DEFAULT_TURN_SPEED);
+	} else {
+		setMotorSyncEncoder(motorB, motorC, -100, (turnTicks/4)*3, DEFAULT_TURN_SPEED);
 	}
 	waitUntilMotorStop(motorB);
 }
@@ -69,17 +63,6 @@ bool followLineRight() {
 	}
 	return true;
 }
-
-//string getColorFromHue(int hue) {
-//	if(hue > 0 && hue < ){return "red";}
-//	else if(){return "yellow";}
-//	else if(){return "green";}
-//	else if(){return "cyan";}
-//	else if(){return "blue";}
-//	else if(){return "purple";}
-//	else if(){return "red";}
-//	else {return null;}
-//}
 
 // listen to commands from computer
 bool TListen() {
@@ -128,97 +111,6 @@ bool TListen() {
 	return go;
 }
 
-// initialization
-void init() {
-	clawControl(false);
-	move(0, 0);
-	delay(100);
-	resetGyro(SGYRO);
-
-	displayBigTextLine(2, "WAITING FOR");
-	displayBigTextLine(5, "CONNECTION");
-	while(!TListen()) {
-		delay(100);
-	}
-	eraseDisplay();
-}
-
-void correct(int goal) {
-	if (getGyroDegrees(SGYRO) < goal) {
-		while (getGyroDegrees(SGYRO) < goal) {
-			setMotorSpeed(motorB, 5);
-		}
-	} else {
-		while (getGyroDegrees(SGYRO) > goal) {
-			setMotorSpeed(motorB, -5);
-		}
-	}
-	move(0, 0);
-}
-
-//search
-bool search() {
-	int dist = 255;
-	int color_reflect = 0;
-	bool busy = true;
-	delay(100);
-	resetGyro(SGYRO);
-	int heading = getGyroDegrees(SGYRO);
-	clearTimer(T1);
-	bool done = false;
-
-	while (busy) {
-		busy = TListen();
-		dist = getUSDistance(SULTRA);
-		color_reflect = getColorReflected(SCOLOR);
-		setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
-
-		if (getTimerValue(T1) > 2000) {
-			move(0, 0);
-			correct(heading);
-			delay(500);
-			resetGyro(SGYRO);
-			clearTimer(T1);
-		}
-
-		string out = "";
-		stringFormat(out, "%1.1f", getGyroDegrees(SGYRO));
-
-		eraseDisplay();
-		displayBigTextLine(1, "SEARCHING");
-		displayBigTextLine(4, out);
-
-		if (dist < 10) {
-			bool turn = true;
-			if (!evenLane) {
-				turn = false;
-			}
-
-			turn90(turn);
-			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
-			waitUntilMotorStop(motorB);
-			turn90(turn);
-			evenLane = !evenLane;
-			resetGyro(SGYRO);
-		}
-
-		if (color_reflect > 4) {
-			move(0, 0);
-			setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, -1*DEFAULT_SPEED);
-			delay(750);
-			clawControl(true);
-			busy = false;
-		} else {
-			setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
-		}
-	}
-
-	if (done) {
-		return false;
-		} else {
-		return true;
-	}
-}
 
 // return to base
 void returnToBase() {
@@ -241,49 +133,16 @@ void returnToBase() {
 
 	while(followLineRight()) {
 		if(getUSDistance(SULTRA) < 15) {
-			setMotorSyncEncoder(motorB, motorC, 0, -1.1*ENCODER_10CM, -DEFAULT_SPEED);
-			waitUntilMotorStop(motorB);
+			setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
 			turn90(true);
-			waitUntilMotorStop(motorB);
 			break;
 		} else {}
 	}
 }
 
-// sort item
-void sortItem() {
-	displayBigTextLine(1, "SORTING");
-	delay(300);
-	long toyColor = getColorHue(SCOLOR);
-	if (toyColor > 350) toyColor-350;
-	while (true) {
-		move(DEFAULT_SPEED, DEFAULT_SPEED);
-		long sortColor = getColorHue(SLINE);
-		if (sortColor > 350) sortColor-350;
-		if ((sortColor > toyColor - 10) && (sortColor < toyColor + 10)) {
-			move(0, 0);
-			break;
-		} else {}
-	}
-
-	displayBigTextLine(1, "COLOR MATCH FOUND");
-
-	turn90(false);
-	clawControl(false);
-	setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, DEFAULT_SPEED);
-	turn90(true);
+task main()
+{
+returnToBase();
 
 
-	waitUntil(getButtonPress(buttonEnter));
-}
-
-task main() {
-	init();
-	bool searching = true;
-	while(searching) {
-		searching = search();
-		returnToBase();
-		sortItem();
-		resetAllSensorAutoID();
-	}
 }
