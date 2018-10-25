@@ -185,7 +185,7 @@ bool search() {
 		color_reflect = getColorReflected(SCOLOR);
 		setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
 
-		if ((getTimerValue(T1) > 2000) && (getUSDistance(SULTRA) > 15)) {
+		if ((getTimerValue(T1) > 2000) && (getUSDistance(SULTRA) > 10)) {
 			move(0, 0);
 			correct(heading);
 			delay(500);
@@ -216,7 +216,7 @@ bool search() {
 
 		if (color_reflect > 4) {
 			move(0, 0);
-			setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, -1*DEFAULT_SPEED);
+			setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, -0.6*DEFAULT_SPEED);
 			delay(750);
 			clawControl(true);
 			busy = false;
@@ -245,7 +245,7 @@ void returnToBase() {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
 
-	setMotorSyncEncoder(motorB, motorC, 0, -5*(ENCODER_10CM/10), -1*DEFAULT_SPEED);
+	setMotorSyncEncoder(motorB, motorC, 0, -0.2*ENCODER_10CM, -1*DEFAULT_SPEED);
 	waitUntilMotorStop(motorB);
 	setMotorSyncEncoder(motorB, motorC, 0, 1.5*ENCODER_10CM, DEFAULT_SPEED);
 	turn90(true);
@@ -282,7 +282,7 @@ void sortItem() {
 
 	turn90(false);
 	clawControl(false);
-	setMotorSyncEncoder(motorB, motorC, 0, 1.0*ENCODER_10CM, DEFAULT_SPEED);
+	setMotorSyncEncoder(motorB, motorC, 0, 0.8*ENCODER_10CM, DEFAULT_SPEED);
 	waitUntilMotorStop(motorB);
 	turn90(true);
 	while(followLineRight()) {
