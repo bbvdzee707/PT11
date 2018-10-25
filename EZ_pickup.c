@@ -70,6 +70,17 @@ bool followLineRight() {
 	return true;
 }
 
+bool followLineLeft() {
+	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
+		motor(motorB) = BEND_SPEED;
+		motor(motorC) = DEFAULT_SPEED;
+		} else {
+		motor(motorB) = DEFAULT_SPEED;
+		motor(motorC) = BEND_SPEED;
+	}
+	return true;
+}
+
 //string getColorFromHue(int hue) {
 //	if(hue > 0 && hue < ){return "red";}
 //	else if(){return "yellow";}
@@ -166,6 +177,7 @@ bool search() {
 	int heading = getGyroDegrees(SGYRO);
 	clearTimer(T1);
 	bool done = false;
+	evenLane = true;
 
 	while (busy) {
 		busy = TListen();
@@ -173,7 +185,7 @@ bool search() {
 		color_reflect = getColorReflected(SCOLOR);
 		setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
 
-		if (getTimerValue(T1) > 2000) {
+		if ((getTimerValue(T1) > 2000) && (getUSDistance(SULTRA) > 15)) {
 			move(0, 0);
 			correct(heading);
 			delay(500);
@@ -255,11 +267,11 @@ void sortItem() {
 	displayBigTextLine(1, "SORTING");
 	delay(300);
 	long toyColor = getColorHue(SCOLOR);
-	if (toyColor > 350) toyColor-350;
+	if (toyColor > 350) toyColor -= 350;
 	while (true) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 		long sortColor = getColorHue(SLINE);
-		if (sortColor > 350) sortColor-350;
+		if (sortColor > 350) sortColor -= 350;
 		if ((sortColor > toyColor - 10) && (sortColor < toyColor + 10)) {
 			move(0, 0);
 			break;
@@ -270,11 +282,17 @@ void sortItem() {
 
 	turn90(false);
 	clawControl(false);
-	setMotorSyncEncoder(motorB, motorC, 0, ENCODER_10CM, DEFAULT_SPEED);
+	setMotorSyncEncoder(motorB, motorC, 0, 1.0*ENCODER_10CM, DEFAULT_SPEED);
+	waitUntilMotorStop(motorB);
+	turn90(true);
+	while(followLineRight()) {
+		if (getUSDistance(SULTRA) < 5) {
+			break;
+		}
+	}
 	turn90(true);
 
 
-	waitUntil(getButtonPress(buttonEnter));
 }
 
 task main() {
