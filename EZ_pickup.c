@@ -227,7 +227,7 @@ void returnToBase() {
 
 	turn90(turn);
 
-	while (getColorReflected(SLINE) > COLOR_THRESHOLD) {
+	while (getColorReflected(SLINE) > 30) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
 
@@ -258,7 +258,7 @@ void sortItem() {
 	if (toyColor == colorBlue) {
 		colorSearch = 42;
 	} else if (toyColor == colorYellow) {
-		colorSearch = 194;
+		colorSearch = 200;
 	} else if (toyColor == colorGreen) {
 		colorSearch = 100;
 	}
@@ -266,7 +266,7 @@ void sortItem() {
 	while (true) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 		int colorHue = getColorHue(SLINE);
-		if ((colorHue > colorSearch - 5) && (colorHue < colorSearch + 5)) {
+		if ((colorHue > colorSearch - 15) && (colorHue < colorSearch + 15)) {
 			move(0, 0);
 			break;
 		}
