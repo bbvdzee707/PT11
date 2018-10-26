@@ -293,12 +293,8 @@ void sortItem() {
 }
 
 task main() {
-	init();
-	bool searching = true;
-	while(searching) {
-		searching = search();
-		returnToBase();
-		sortItem();
-		resetAllSensorAutoID();
-	}
+	while(true) {
+	TListen();
+	setMotorSync(motorB, motorC, 0, DEFAULT_SPEED);
+}
 }
