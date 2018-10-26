@@ -95,25 +95,25 @@ bool TListen() {
 	go = DEFAULT_GO;
 
 	readMailboxIn("EV3_INBOX0", msgBufIn);
-	//if (strcmp(msgBufIn, "speed 0")) {
-	//	newSpeed = 1 * 6;
-	//} else if (strcmp(msgBufIn, "speed 1")) {
-	//	newSpeed = 2 * 6;
-	//} else if (strcmp(msgBufIn, "speed 2")) {
-	//	newSpeed = 3 * 6;
-	//} else if (strcmp(msgBufIn, "speed 3")) {
-	//	newSpeed = 4 * 6;
-	//} else if (strcmp(msgBufIn, "speed 4")) {
-	//	newSpeed = 5 * 6;
-	//} else if (strcmp(msgBufIn, "speed 5")) {
-	//	newSpeed = 6 * 6;
-	//} else if (strcmp(msgBufIn, "Start")) {
-	//	go = true;
-	//} else if (strcmp(msgBufIn, "Stop")) {
-	//	go = false;
-	//} else {
+	if (strcmp(msgBufIn, "speed 0")) {
+		newSpeed = 1 * 6;
+	} else if (strcmp(msgBufIn, "speed 1")) {
+		newSpeed = 2 * 6;
+	} else if (strcmp(msgBufIn, "speed 2")) {
+		newSpeed = 3 * 6;
+	} else if (strcmp(msgBufIn, "speed 3")) {
+		newSpeed = 4 * 6;
+	} else if (strcmp(msgBufIn, "speed 4")) {
+		newSpeed = 5 * 6;
+	} else if (strcmp(msgBufIn, "speed 5")) {
+		newSpeed = 6 * 6;
+	} else if (strcmp(msgBufIn, "Start")) {
+		go = true;
+	} else if (strcmp(msgBufIn, "Stop")) {
+		go = false;
+	} else {
 
-	//}
+	}
 
 	DEFAULT_SPEED = newSpeed;
 	BEND_SPEED = (int)((newSpeed/3)*2);
@@ -174,7 +174,7 @@ bool search() {
 		color_reflect = getColorReflected(SCOLOR);
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 
-		if ((getTimerValue(T1) > 2000) && (dist > 10)) {
+		if ((getTimerValue(T1) > 2000) && (dist > 15)) {
 			move(0, 0);
 			correct(heading);
 			resetGyro(SGYRO);
@@ -188,12 +188,15 @@ bool search() {
 		displayBigTextLine(1, "SEARCHING");
 		displayBigTextLine(4, out);
 
-		if (dist < 10) {
+		if (dist < 15) {
 			bool turn = true;
 			if (!evenLane) {
 				turn = false;
 			}
 
+			if (dist < 5) {
+				setMotorSyncTime(motorB, motorC, 0, 500, DEFAULT_SPEED);
+			}
 			turn90(turn);
 			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
 			waitUntilMotorStop(motorB);
@@ -209,7 +212,7 @@ bool search() {
 			clawControl(true);
 			busy = false;
 		} else {
-			setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
+			move(DEFAULT_SPEED, DEFAULT_SPEED);
 		}
 	}
 
@@ -267,7 +270,8 @@ void sortItem() {
 	}
 
 	displayBigTextLine(1, "COLOR MATCH FOUND");
-	setMotorSyncTime(motorB, motorC, 0, 300, DEFAULT_SPEED);
+	setMotorSyncTime(motorB, motorC, 0, 500, -1*DEFAULT_SPEED);
+	waitUntilMotorStop(motorB);
 	turn90(false);
 	clawControl(false);
 	setMotorSyncEncoder(motorB, motorC, 0, 0.8*ENCODER_10CM, DEFAULT_SPEED);
