@@ -226,8 +226,9 @@ void returnToBase() {
 	}
 
 	turn90(turn);
-
-	while (getColorReflected(SLINE) > 30) {
+	sensorReset(SLINE);
+	delay(100);
+	while (getUSDistance(SULTRA) > 10) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
 
@@ -256,22 +257,16 @@ void sortItem() {
 	int colorSearch = 0;
 
 	if (toyColor == colorBlue) {
-		colorSearch = 42;
+		setMotorSyncEncoder(motorB, motorC, 0, 0.2*ENCODER_10CM, -1*BEND_SPEED);
 	} else if (toyColor == colorYellow) {
-		colorSearch = 200;
+		setMotorSyncEncoder(motorB, motorC, 0, 0.8*ENCODER_10CM, -1*BEND_SPEED);
 	} else if (toyColor == colorGreen) {
-		colorSearch = 100;
+		setMotorSyncEncoder(motorB, motorC, 0, 1.6*ENCODER_10CM, -1*BEND_SPEED);
+	} else {
+		setMotorSync(motorB, motorC, 0, 10);
 	}
 
-	while (true) {
-		move(DEFAULT_SPEED, DEFAULT_SPEED);
-		int colorHue = getColorHue(SLINE);
-		if ((colorHue > colorSearch - 15) && (colorHue < colorSearch + 15)) {
-			move(0, 0);
-			break;
-		}
-
-	}
+	waitUntilMotorStop(motorB);
 
 	displayBigTextLine(1, "COLOR MATCH FOUND");
 	setMotorSyncTime(motorB, motorC, 0, 500, -1*DEFAULT_SPEED);
