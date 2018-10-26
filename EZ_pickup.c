@@ -48,7 +48,7 @@ void clawControl(bool pickUp) {
 }
 
 // true=right, false=left
-int turnTicks = 200;
+int turnTicks = 210;
 void turn90(bool direction) {
 	move(0, 0);
 	if(!direction) {
@@ -66,17 +66,6 @@ bool followLineRight() {
 		} else {
 		motor(motorC) = DEFAULT_SPEED;
 		motor(motorB) = BEND_SPEED;
-	}
-	return true;
-}
-
-bool followLineLeft() {
-	if(getColorReflected(SLINE) < COLOR_THRESHOLD) {
-		motor(motorB) = BEND_SPEED;
-		motor(motorC) = DEFAULT_SPEED;
-		} else {
-		motor(motorB) = DEFAULT_SPEED;
-		motor(motorC) = BEND_SPEED;
 	}
 	return true;
 }
@@ -183,12 +172,11 @@ bool search() {
 		busy = TListen();
 		dist = getUSDistance(SULTRA);
 		color_reflect = getColorReflected(SCOLOR);
-		setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
+		move(DEFAULT_SPEED, DEFAULT_SPEED);
 
-		if ((getTimerValue(T1) > 2000) && (getUSDistance(SULTRA) > 10)) {
+		if ((getTimerValue(T1) > 2000) && (dist > 10)) {
 			move(0, 0);
 			correct(heading);
-			delay(500);
 			resetGyro(SGYRO);
 			clearTimer(T1);
 		}
@@ -279,7 +267,7 @@ void sortItem() {
 	}
 
 	displayBigTextLine(1, "COLOR MATCH FOUND");
-
+	setMotorSyncTime(motorB, motorC, 0, 300, DEFAULT_SPEED);
 	turn90(false);
 	clawControl(false);
 	setMotorSyncEncoder(motorB, motorC, 0, 0.8*ENCODER_10CM, DEFAULT_SPEED);
