@@ -1,6 +1,6 @@
-#pragma config(Sensor, S1,     Linefinder,     sensorEV3_Color)
+#pragma config(Sensor, S1,     Linefinder,     sensorEV3_Color, modeEV3Color_RGB_Raw)
 #pragma config(Sensor, S2,     Gyro,           sensorEV3_Gyro)
-#pragma config(Sensor, S3,     Color,          sensorEV3_Color)
+#pragma config(Sensor, S3,     Color,          sensorEV3_Color, modeEV3Color_RGB_Raw)
 #pragma config(Sensor, S4,     Ultra,          sensorEV3_Ultrasonic)
 #pragma config(Motor,  motorA,          claw,          tmotorEV3_Medium, PIDControl, encoder)
 #pragma config(Motor,  motorB,          left,          tmotorEV3_Large, PIDControl, reversed, driveLeft, encoder)
@@ -40,15 +40,14 @@ void clawControl(bool pickUp) {
 		} else {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
+		setMotorSpeed(motorA, -20);
+		delay(400);
 		setMotorSpeed(motorA, 0);
-		delay(1000);
-		setMotorSpeed(motorA, 0);
-
 	}
 }
 
 // true=right, false=left
-int turnTicks = 210;
+int turnTicks = 200;
 void turn90(bool direction) {
 	move(0, 0);
 	if(!direction) {
@@ -87,49 +86,43 @@ bool TListen() {
 	char msgBufOut[MAX_MSG_LENGTH];  // To contain the outgoing message
 	openMailboxIn("EV3_INBOX0");
 	openMailboxOut("EV3_OUTBOX0");
-	displayBigTextLine(1, msgBufIn);
-	delay(1000);
 
-	int newSpeed = DEFAULT_SPEED;
+	int newSpeed = 25;
 	go = DEFAULT_GO;
 
-	readMailboxIn("EV3_INBOX0", msgBufIn);
-	if (strcmp(msgBufIn, "0")) {
-		newSpeed = 1 * 6;
-		} else if (strcmp(msgBufIn, "1")) {
-		newSpeed = 2 * 6;
-		} else if (strcmp(msgBufIn, "2")) {
-		newSpeed = 3 * 6;
-		} else if (strcmp(msgBufIn, "3")) {
-		newSpeed = 4 * 6;
-		} else if (strcmp(msgBufIn, "4")) {
-		newSpeed = 5 * 6;
-		} else if (strcmp(msgBufIn, "5")) {
-		newSpeed = 6 * 6;
-		} else if (strcmp(msgBufIn, "Start")) {
-		go = true;
-		} else if (strcmp(msgBufIn, "Stop")) {
-		go = false;
-		} else {
+	while(true) {
+		readMailboxIn("EV3_INBOX0", msgBufIn);
+		//if (strcmp(msgBufIn, "0")) {
+		//	newSpeed = 1 * 6;
+		//	} else if (strcmp(msgBufIn, "1")) {
+		//	newSpeed = 2 * 6;
+		//	} else if (strcmp(msgBufIn, "2")) {
+		//	newSpeed = 3 * 6;
+		//	} else if (strcmp(msgBufIn, "3")) {
+		//	newSpeed = 4 * 6;
+		//	} else if (strcmp(msgBufIn, "4")) {
+		//	newSpeed = 5 * 6;
+		//	} else if (strcmp(msgBufIn, "5")) {
+		//	newSpeed = 6 * 6;
+		//	} else
+				if (strcmp(msgBufIn, "Start")) {
+			int dist = getUSDistance(SULTRA);
+			int head = getGyroDegrees(SGYRO);
 
+			sprintf(msgBufOut, "%i %i", dist, head);
+			writeMailboxOut("EV3_OUTBOX0", msgBufOut);
+				break;
+			} else if (!strcmp(msgBufIn, "")) {
+
+		} else {}
+
+		DEFAULT_SPEED = newSpeed;
+		BEND_SPEED = (int)((newSpeed/3)*2);
+
+
+
+		delay(100);
 	}
-
-	string message;
-	strcpy(message, msgBufIn);
-	eraseDisplay();
-	displayBigTextLine(1, message);
-
-	DEFAULT_SPEED = newSpeed;
-	BEND_SPEED = (int)((newSpeed/3)*2);
-
-	int dist = getUSDistance(SULTRA);
-	int head = getGyroDegrees(SGYRO);
-
-	sprintf(msgBufOut, "%i %i", dist, head);
-	writeMailboxOut("EV3_OUTBOX0", msgBufOut);
-
-	delay(100);
-
 	return go;
 }
 
@@ -142,9 +135,7 @@ void init() {
 
 	displayBigTextLine(2, "WAITING FOR");
 	displayBigTextLine(5, "CONNECTION");
-	while(!TListen()) {
-		delay(100);
-	}
+	//TListen();
 	eraseDisplay();
 }
 
@@ -178,13 +169,12 @@ bool search() {
 		color_reflect = getColorReflected(SCOLOR);
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 
-		if ((getTimerValue(T1) > 2000) && (dist > 15)) {
-			move(0, 0);
-			correct(heading);
-			TListen();
-			resetGyro(SGYRO);
-			clearTimer(T1);
-		}
+		//if ((getTimerValue(T1) > 2000) && (dist > 15)) {
+		//	move(0, 0);
+		//	correct(heading);
+		//	resetGyro(SGYRO);
+		//	clearTimer(T1);
+		//}
 
 		string out = "";
 		stringFormat(out, "%1.1f", getGyroDegrees(SGYRO));
@@ -193,7 +183,7 @@ bool search() {
 		//displayBigTextLine(1, "SEARCHING");
 		//displayBigTextLine(4, out);
 
-		if (dist < 15) {
+		if (dist < 10) {
 			bool turn = true;
 			if (!evenLane) {
 				turn = false;
@@ -203,7 +193,7 @@ bool search() {
 				setMotorSyncTime(motorB, motorC, 0, 500, DEFAULT_SPEED);
 			}
 			turn90(turn);
-			setMotorSyncEncoder(motorB, motorC, 0, -1*ENCODER_10CM, -1*DEFAULT_SPEED);
+			setMotorSyncEncoder(motorB, motorC, 0, -0.8*ENCODER_10CM, -1*DEFAULT_SPEED);
 			waitUntilMotorStop(motorB);
 			turn90(turn);
 			evenLane = !evenLane;
@@ -262,16 +252,25 @@ void returnToBase() {
 void sortItem() {
 	displayBigTextLine(1, "SORTING");
 	delay(300);
-	long toyColor = getColorHue(SCOLOR);
-	if (toyColor > 350) toyColor -= 350;
+	TLegoColors toyColor = getColorName(SCOLOR);
+	int colorSearch = 0;
+
+	if (toyColor == colorBlue) {
+		colorSearch = 42;
+	} else if (toyColor == colorYellow) {
+		colorSearch = 194;
+	} else if (toyColor == colorGreen) {
+		colorSearch = 100;
+	}
+
 	while (true) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
-		long sortColor = getColorHue(SLINE);
-		if (sortColor > 350) sortColor -= 350;
-		if ((sortColor > toyColor - 10) && (sortColor < toyColor + 10)) {
+		int colorHue = getColorHue(SLINE);
+		if ((colorHue > colorSearch - 5) && (colorHue < colorSearch + 5)) {
 			move(0, 0);
 			break;
-		} else {}
+		}
+
 	}
 
 	displayBigTextLine(1, "COLOR MATCH FOUND");

@@ -87,10 +87,8 @@ bool TListen() {
 	char msgBufOut[MAX_MSG_LENGTH];  // To contain the outgoing message
 	openMailboxIn("EV3_INBOX0");
 	openMailboxOut("EV3_OUTBOX0");
-	displayBigTextLine(1, msgBufIn);
-	delay(1000);
 
-	int newSpeed = DEFAULT_SPEED;
+	int newSpeed = 25;
 	go = DEFAULT_GO;
 
 	readMailboxIn("EV3_INBOX0", msgBufIn);
@@ -295,6 +293,6 @@ void sortItem() {
 task main() {
 	while(true) {
 	TListen();
-	setMotorSync(motorB, motorC, 0, DEFAULT_SPEED);
+	setMotorSync(motorB, motorC, 0, -1*DEFAULT_SPEED);
 }
 }
