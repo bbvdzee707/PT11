@@ -40,7 +40,7 @@ void clawControl(bool pickUp) {
 		} else {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
-		setMotorSpeed(motorA, -20);
+		setMotorSpeed(motorA, -40);
 		delay(400);
 		setMotorSpeed(motorA, 0);
 	}
@@ -253,17 +253,21 @@ void returnToBase() {
 void sortItem() {
 	displayBigTextLine(1, "SORTING");
 	delay(300);
+	sensorReset(SCOLOR);
 	TLegoColors toyColor = getColorName(SCOLOR);
-	int colorSearch = 0;
 
+	eraseDisplay();
 	if (toyColor == colorBlue) {
+		displayBigTextLine(4, "BLUE");
 		setMotorSyncEncoder(motorB, motorC, 0, 0.2*ENCODER_10CM, -1*BEND_SPEED);
-	} else if (toyColor == colorYellow) {
+	} else if (toyColor == 4) {
+		displayBigTextLine(4, "YELLOW");
 		setMotorSyncEncoder(motorB, motorC, 0, 0.8*ENCODER_10CM, -1*BEND_SPEED);
 	} else if (toyColor == colorGreen) {
+		displayBigTextLine(4, "GREEN");
 		setMotorSyncEncoder(motorB, motorC, 0, 1.6*ENCODER_10CM, -1*BEND_SPEED);
 	} else {
-		setMotorSync(motorB, motorC, 0, 10);
+		displayBigTextLine(4, "OTHER");
 	}
 
 	waitUntilMotorStop(motorB);
