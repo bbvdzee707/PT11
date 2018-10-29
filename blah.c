@@ -1,10 +1,10 @@
 
 task main()
 {
-	setMotorSyncEncoder(motorB, motorC, 0, -800, -25);
+
 while(true) {
 	string out;
-	stringFormat(out, "%i", getColorHue(S1));
+	stringFormat(out, "%i", getColorHue(S3));
 	displayBigTextLine(1, out);
 }
 
