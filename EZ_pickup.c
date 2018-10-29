@@ -76,7 +76,7 @@ void calibrate() {
 }
 
 // true=right, false=left
-int turnTicks = 205;
+int turnTicks = 200;
 void turn90(bool direction) {
 	move(0, 0);
 	if(!direction) {
@@ -117,7 +117,31 @@ bool TListen() {
 	openMailboxOut("EV3_OUTBOX0");
 	waitForMailboxMessage(0);
 	readMailboxIn("EV3_INBOX0", msgBufIn);
-	DEFAULT_SPEED = ((((int)msgBufIn[7])+1)*6);
+	while(!(msgBufIn[0] == 'S') && !(msgBufIn[1] == 't')){
+
+	}
+	int newspeed = ((int)msgBufIn[6])-48;
+	switch(newspeed)
+	{
+		case 1:
+		DEFAULT_SPEED = 5;
+		break;
+		case 2:
+		DEFAULT_SPEED = 10;
+		break;
+		case 3:
+		DEFAULT_SPEED = 15;
+		break;
+		case 4:
+		DEFAULT_SPEED = 20;
+		break;
+		case 5:
+		DEFAULT_SPEED = 25;
+		break;
+		default:
+		DEFAULT_SPEED = 100;
+		break;
+	}
 	return go;
 }
 
