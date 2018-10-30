@@ -149,6 +149,7 @@ void sendBack(int num) {
 	openMailboxOut("EV3_OUTBOX0");
 	sprintf(msgBufOut, "%i", num);
 	writeMailboxOut("EV3_OUTBOX0", msgBufOut);
+	delay(100);
 	closeMailboxOut("EV3_OUTBOX0");
 }
 
