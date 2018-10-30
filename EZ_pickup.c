@@ -110,7 +110,7 @@ bool TListen() {
 	openMailboxIn("EV3_INBOX0");
 	waitForMailboxMessage(0);
 	readMailboxIn("EV3_INBOX0", msgBufIn);
-	while(!(msgBufIn[0] == 'S') && !(msgBufIn[1] == 't')){
+	while(!(msgBufIn[0] == 'S') && !(msgBufIn[2] == 'a')){
 
 	}
 	int newspeed = ((int)msgBufIn[6])-48;
@@ -136,7 +136,6 @@ bool TListen() {
 		break;
 	}
 
-	closeMailboxIn("EV3_INBOX0");
 	return go;
 }
 
@@ -145,8 +144,7 @@ void sendBack(int num) {
 	openMailboxOut("EV3_OUTBOX0");
 	sprintf(msgBufOut, "%i", num);
 	writeMailboxOut("EV3_OUTBOX0", msgBufOut);
-	delay(100);
-	closeMailboxOut("EV3_OUTBOX0");
+
 }
 
 // initialization
