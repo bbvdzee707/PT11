@@ -18,7 +18,6 @@
 
 int DEFAULT_SPEED = 25;
 bool go = true;
-bool DEFAULT_GO = true;
 bool evenLane = true;
 int numSorted = 0;
 
@@ -112,9 +111,7 @@ bool followLineRight() {
 // listen to commands from computer
 bool TListen() {
 	char msgBufIn[MAX_MSG_LENGTH];  // To contain the incoming message.
-	char msgBufOut[MAX_MSG_LENGTH];  // To contain the outgoing message
 	openMailboxIn("EV3_INBOX0");
-	openMailboxOut("EV3_OUTBOX0");
 	waitForMailboxMessage(0);
 	readMailboxIn("EV3_INBOX0", msgBufIn);
 	while(!(msgBufIn[0] == 'S') && !(msgBufIn[1] == 't')){
@@ -142,6 +139,8 @@ bool TListen() {
 		DEFAULT_SPEED = 100;
 		break;
 	}
+
+	closeMailboxIn("EV3_INBOX0");
 	return go;
 }
 
@@ -150,6 +149,7 @@ void sendBack(int num) {
 	openMailboxOut("EV3_OUTBOX0");
 	sprintf(msgBufOut, "%i", num);
 	writeMailboxOut("EV3_OUTBOX0", msgBufOut);
+	closeMailboxOut("EV3_OUTBOX0");
 }
 
 // initialization
