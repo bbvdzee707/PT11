@@ -42,7 +42,7 @@ void clawControl(bool pickUp) {
 		setMotorSpeed(motorA, 40);
 		delay(1000);
 		setMotorSpeed(motorA, -40);
-		delay(450);
+		delay(470);
 		setMotorSpeed(motorA, 0);
 	}
 }
@@ -185,7 +185,7 @@ bool search() {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 		string out = "";
 
-		if (dist < 10) {
+		if (dist < 14) {
 			bool turn = true;
 			if (!evenLane) {
 				turn = false;
@@ -229,7 +229,7 @@ void returnToBase() {
 	turn90(turn);
 	sensorReset(SLINE);
 	delay(100);
-	while (getUSDistance(SULTRA) > 10) {
+	while (getUSDistance(SULTRA) > 12) {
 		move(DEFAULT_SPEED, DEFAULT_SPEED);
 	}
 
@@ -275,8 +275,8 @@ void sortItem() {
 		distance = 6000;
 
 	}  else {
-		displayBigTextLine(4, "OTHER");
-		distance = 1000;
+		displayBigTextLine(4, "BLUE");
+		distance = 2000;
 	}
 
 	clearTimer(T2);
