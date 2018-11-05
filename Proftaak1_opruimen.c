@@ -159,9 +159,9 @@ void init() {
 
 	displayBigTextLine(2, "WAITING FOR");
 	displayBigTextLine(5, "CONNECTION");
-	//while(!TListen()) {
-	//	delay(100);
-	//}
+	while(!TListen()) {
+		delay(100);
+	}
 	eraseDisplay();
 }
 
